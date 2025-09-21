@@ -25,11 +25,8 @@ Cette opération est bloquante de lamême manière que le read.
 	> sur le thread appelant : 
 	si une opération de lecture était en cours, celle si s'arrête automatiquement, les bits restant dans le canal sont détruits/jetés et la methode read renvoie -1; si une opération d'écriture était en cours, elle et intérompue, le retse des données à écrire est déruit et la methode renvoie -1.
 	> sur le thread de l'autre coté du cannal :
-	si une opération de lecture ou d'écriture était en cours, celle si se termine avant constat de la rupture du canal; ensuite le canal est également déconnectée par ce thread.
 
-- **disconnected** : renvoie true si le le canal est déconnecté ou false sinon.
-
-## Task
-Cette classe encapsule l'exécution de nos classes (serveur, client etc...). Son construteur comprend deux arguments : un Broker et un runnable. Les runble sont implémentés par nos classe serveur/client. IL a une principale méthode statique getBrocker qui renvoie le brocker utiliser dans toute l'application.
+- **disconnected** : renvoie true si le
 
 
+# Comment utiliser ces classes ?

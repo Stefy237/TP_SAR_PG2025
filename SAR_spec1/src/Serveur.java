@@ -1,9 +1,9 @@
-public class Serveur {
-    Broker bk = new Broker("Serveur");
-    Task t = new Task(bk, new Runnable(
-        void run() {
-            Channel channel = bk.accept(0);
-        }
-    ));
-    t.start();
+public class Serveur implements Runnable{
+
+	@Override
+	public void run() {
+		// TODO Auto-generated method stub
+		
+	}
+
 }
