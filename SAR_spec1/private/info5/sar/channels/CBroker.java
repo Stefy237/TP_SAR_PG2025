@@ -17,43 +17,51 @@
 package info5.sar.channels;
 
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
+import info5.sar.utils.BrokerManager;
+import info5.sar.utils.RDVManager;
+import info5.sar.utils.Type;
 
 public class CBroker extends Broker {
-	static Map<String, Broker> brokerList = new ConcurrentHashMap<>();
+	private boolean isAlive = true;
+	private RDVManager rdvManager = new RDVManager();
 	
-	private Map<Integer, Channel> pendingConnectChannel = new ConcurrentHashMap<>();
-	
-  public CBroker(String name) {
-	  try {
-		  if (brokerList.containsKey(name)) throw new RuntimeException("Name already use");
-		  brokerList.put(name, this);
+
+	public CBroker(String name) {
 		  super(name);
-	  } catch (RuntimeException re) {
-		  System.err.println(re.getMessage());
-	      re.printStackTrace(System.err);
 	  }
-  }
 
   @Override
-  public synchronized Channel accept(int port) {
-    while(!pendingConnectChannel.containsKey(port)) wait();
-    notify();
-    return pendingConnectChannel.remove(port);
-  }
-
-  @Override
-  public synchronized Channel connect(String name, int port) {
+  public Channel accept(int port){
+	  System.out.println("------------------------" + name + " accepting ----------------------------");
 	  try {
-		  CBroker remoteBroker = CBroker.brokerList.get(name);
-		  CChannel ch = new CChannel(this);
-		  remoteBroker.pendingConnectChannel.put(port, ch);
-		  
-		  while(remoteBroker.pendingConnectChannel.containsKey(port)) wait();
-		  notify();
-		  return ch;
-	  } catch (Exception) {
-		  
-	  }
+		rdvManager.create(port).come(Type.ACCEPT);
+	} catch (InterruptedException e) {
+		isAlive = false;
+		e.printStackTrace();
+	}
+	  return new CChannel(this, port);
   }
+
+	@Override
+	public Channel connect(String name, int port) {
+		System.out.println("------------------------" + name + " connecting ----------------------------");
+		CBroker targetBroker = (CBroker) BrokerManager.getInstance().getBrokerByName(name);
+		if(targetBroker != null) {
+			try {
+				targetBroker.getRdvManager().create(port).come(Type.CONNECT);
+			} catch (InterruptedException e) {
+				isAlive = false;
+				e.printStackTrace();
+			}
+			return new CChannel(this, port);
+		}
+		return null;
+	}
+	
+	  public RDVManager getRdvManager() {
+			return rdvManager;
+	  }
 
 }
