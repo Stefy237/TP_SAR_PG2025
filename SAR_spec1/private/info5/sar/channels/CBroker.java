@@ -20,11 +20,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import info5.sar.utils.BrokerManager;
+import info5.sar.utils.RDV;
 import info5.sar.utils.RDVManager;
 import info5.sar.utils.Type;
 
 public class CBroker extends Broker {
-	private boolean isAlive = true;
+	private boolean alive = true;
 	private RDVManager rdvManager = new RDVManager();
 	
 
@@ -33,29 +34,29 @@ public class CBroker extends Broker {
 	  }
 
   @Override
-  public Channel accept(int port){
+  public synchronized Channel accept(int port){
 	  System.out.println("------------------------" + name + " accepting ----------------------------");
 	  try {
-		rdvManager.create(port).come(Type.ACCEPT);
+		RDV rdv = rdvManager.create(port);
+		rdv.come(Type.ACCEPT);
+		return new CChannel(this, port);
 	} catch (InterruptedException e) {
-		isAlive = false;
 		e.printStackTrace();
 	}
-	  return new CChannel(this, port);
+	  return null;
   }
 
 	@Override
-	public Channel connect(String name, int port) {
+	public synchronized Channel connect(String name, int port) {
 		System.out.println("------------------------" + name + " connecting ----------------------------");
 		CBroker targetBroker = (CBroker) BrokerManager.getInstance().getBrokerByName(name);
 		if(targetBroker != null) {
 			try {
 				targetBroker.getRdvManager().create(port).come(Type.CONNECT);
+				return new CChannel(this, port);
 			} catch (InterruptedException e) {
-				isAlive = false;
 				e.printStackTrace();
 			}
-			return new CChannel(this, port);
 		}
 		return null;
 	}

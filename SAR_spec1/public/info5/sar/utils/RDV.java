@@ -1,7 +1,5 @@
 package info5.sar.utils;
 
-import java.util.concurrent.Semaphore;
-
 public class RDV {
 	private int port;
 	
@@ -9,40 +7,27 @@ public class RDV {
 		this.port = port;
 	}
 	
-	private final Semaphore connectSem = new Semaphore(0);
-	private final Semaphore acceptSem = new Semaphore(0);
-	private final Semaphore mutex = new Semaphore(1);
+	boolean pendingAccept = false;
+	boolean pendingConnect = false;
 	
-	private int nConnect = 0;
-	private boolean pendingAccept = false;
-	private boolean acceptDone = false;
-	
-	public void come(Type type) throws InterruptedException {
-		mutex.acquire();
+	public synchronized void come(Type type) throws InterruptedException {
 		switch(type) {
 		case CONNECT :
-			if(pendingAccept && !acceptDone) {
-				acceptSem.release();
-				acceptDone = true;
-				mutex.release();
-			} else if(pendingAccept && acceptDone){
-				mutex.release();
+			pendingConnect = true;
+			if(pendingAccept) {
+				notifyAll();
 			} else {
-				nConnect++;
-				mutex.release();
-				connectSem.acquire();
+				wait(1000);
+				throw new InterruptedException();
 			}
 			break;
 		case ACCEPT :
 			pendingAccept = true;
-			
-			if(nConnect > 0) {
-				connectSem.release(nConnect);
-				nConnect = 0;
-				mutex.release();
+			if(pendingConnect) {
+				notifyAll();
 			} else {
-				mutex.release();
-				acceptSem.acquire();
+				wait(1000);
+				throw new InterruptedException();
 			}
 			break;
 		}

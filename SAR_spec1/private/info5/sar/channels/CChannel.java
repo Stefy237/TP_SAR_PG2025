@@ -19,21 +19,21 @@ package info5.sar.channels;
 import info5.sar.utils.CircularBuffer;
 
 public class CChannel extends Channel {
-	private CircularBuffer buffer;
-	
-	public CircularBuffer getBuffer() {
-		return buffer;
-	}
+	private CircularBuffer inBuffer;
+	private CircularBuffer outBuffer;
 
-	public void setBuffer(CircularBuffer buffer) {
-		this.buffer = buffer;
-	}
 
-	private boolean isDisconnected = false;
+	private boolean disconnected = false;
 	
   protected CChannel(Broker broker, int port) {
     super(broker);
     // throw new RuntimeException("NYI");
+  }
+  
+  protected CChannel(Broker broker, CircularBuffer inBuffer, CircularBuffer outBuffer) {
+	  super(broker);
+      this.inBuffer = inBuffer;
+      this.outBuffer = outBuffer;
   }
 
   // added for helping debugging applications.
@@ -45,11 +45,10 @@ public class CChannel extends Channel {
   public synchronized int read(byte[] bytes, int offset, int length) {
 	System.out.println("------------------------" + getRemoteName() + " reading ----------------------------");
     int i = 0;
-    while(i < length-offset && !buffer.empty()) {
-    	bytes[i] = buffer.pull();
+    while(i < length-offset && !inBuffer.empty()) {
+    	bytes[i] = inBuffer.pull();
     	i++;
     	if(disconnected()) throw new RuntimeException();
-    	//if(buffer.empty()) wait();
     }
     System.out.println("------------------------ end reading ----------------------------");
     return i;
@@ -59,8 +58,8 @@ public class CChannel extends Channel {
   public synchronized int write(byte[] bytes, int offset, int length) {
 	  System.out.println("------------------------ " + getRemoteName() + " writing ----------------------------");
     int i = 0;
-    while(i < length-offset && !buffer.full()) {
-    	buffer.push(bytes[i]);
+    while(i < length-offset && !outBuffer.full()) {
+    	outBuffer.push(bytes[i]);
     	i++;
     	if(disconnected()) throw new RuntimeException();
     }
@@ -70,15 +69,30 @@ public class CChannel extends Channel {
 
   @Override
   public void disconnect() {
-    if(!isDisconnected) {
-    	isDisconnected = true;
+    if(!disconnected) {
+    	disconnected = true;
     	
     }
   }
 
   @Override
   public boolean disconnected() {
-    return isDisconnected;
+    return disconnected;
   }
+  
+	public CircularBuffer getInBuffer() {
+		return inBuffer;
+	}
 
+	public void setInBuffer(CircularBuffer inBuffer) {
+		this.inBuffer = inBuffer;
+	}
+
+	public CircularBuffer getOutBuffer() {
+		return outBuffer;
+	}
+
+	public void setOutBuffer(CircularBuffer outBuffer) {
+		this.outBuffer = outBuffer;
+	}
 }
