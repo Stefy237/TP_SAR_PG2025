@@ -1,0 +1,31 @@
+@startuml design version 1
+circle task1
+circle task2
+circle broker1
+circle broker2
+circle brokerManager
+circle rdvManager1
+circle rdv
+circle channel1
+circle channel2
+queue buffer1
+queue buffer2
+
+task1 --> broker1
+task2 --> broker2
+broker1 --> broker1 : accept(3000)
+broker2 <--> brokerManager : connect("broker1", 3000)
+broker1 --> rdvManager1
+broker2 --> rdvManager1
+brokerManager <--> broker1
+broker1 --> channel1 : accept
+broker2 --> channel2 : connect
+channel1 --> "in buffer" buffer1
+channel2 --> "in buffer" buffer2
+channel1 --> "out buffer" buffer2
+channel2 --> "out buffer" buffer1
+rdv <--> rdvManager1
+channel1 <--> channel2
+rdv --> channel1
+rdv --> channel2
+@enduml

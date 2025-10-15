@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 import info5.sar.utils.BrokerManager;
-import info5.sar.utils.RDV;
+import info5.sar.utils.CircularBuffer;
 import info5.sar.utils.RDVManager;
 import info5.sar.utils.Type;
 
@@ -28,18 +28,18 @@ public class CBroker extends Broker {
 	private boolean alive = true;
 	private RDVManager rdvManager = new RDVManager();
 	
-
 	public CBroker(String name) {
 		  super(name);
 	  }
 
   @Override
-  public synchronized Channel accept(int port){
-	  System.out.println("------------------------" + name + " accepting ----------------------------");
+  public Channel accept(int port){
+	  System.out.println("------------------------" + this.name + " accepting ----------------------------");
 	  try {
 		RDV rdv = rdvManager.create(port);
-		rdv.come(Type.ACCEPT);
-		return new CChannel(this, port);
+		CChannel channel = rdv.come(this, Type.ACCEPT);
+		
+		return channel;
 	} catch (InterruptedException e) {
 		e.printStackTrace();
 	}
@@ -47,13 +47,15 @@ public class CBroker extends Broker {
   }
 
 	@Override
-	public synchronized Channel connect(String name, int port) {
-		System.out.println("------------------------" + name + " connecting ----------------------------");
-		CBroker targetBroker = (CBroker) BrokerManager.getInstance().getBrokerByName(name);
-		if(targetBroker != null) {
+	public Channel connect(String name, int port) {
+		System.out.println("------------------------" + this.name + " connecting ----------------------------");
+		CBroker remoteBroker = (CBroker) BrokerManager.getInstance().getBrokerByName(name);
+		if(remoteBroker != null) {
 			try {
-				targetBroker.getRdvManager().create(port).come(Type.CONNECT);
-				return new CChannel(this, port);
+				RDV rdv = remoteBroker.getRdvManager().create(port);
+				CChannel channel = rdv.come(this, Type.CONNECT);
+				
+				return channel;
 			} catch (InterruptedException e) {
 				e.printStackTrace();
 			}

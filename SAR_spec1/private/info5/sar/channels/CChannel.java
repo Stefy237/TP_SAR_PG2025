@@ -21,13 +21,14 @@ import info5.sar.utils.CircularBuffer;
 public class CChannel extends Channel {
 	private CircularBuffer inBuffer;
 	private CircularBuffer outBuffer;
-
+	private CChannel remoteChannel;
+	// private CBroker broker;
 
 	private boolean disconnected = false;
 	
   protected CChannel(Broker broker, int port) {
     super(broker);
-    // throw new RuntimeException("NYI");
+    this.inBuffer = new CircularBuffer(1000);
   }
   
   protected CChannel(Broker broker, CircularBuffer inBuffer, CircularBuffer outBuffer) {
@@ -38,12 +39,12 @@ public class CChannel extends Channel {
 
   // added for helping debugging applications.
   public String getRemoteName() {
-    return super.broker.getName();
+    return remoteChannel.getBroker().getName();
   }
 
   @Override
   public synchronized int read(byte[] bytes, int offset, int length) {
-	System.out.println("------------------------" + getRemoteName() + " reading ----------------------------");
+	System.out.println("------------------------" + broker.getName() + " is reading from " + getRemoteName() + " ----------------------------");
     int i = 0;
     while(i < length-offset && !inBuffer.empty()) {
     	bytes[i] = inBuffer.pull();
@@ -56,7 +57,7 @@ public class CChannel extends Channel {
 
   @Override
   public synchronized int write(byte[] bytes, int offset, int length) {
-	  System.out.println("------------------------ " + getRemoteName() + " writing ----------------------------");
+	  System.out.println("------------------------ " + broker.getName() + " is writing to " + getRemoteName() + "----------------------------");
     int i = 0;
     while(i < length-offset && !outBuffer.full()) {
     	outBuffer.push(bytes[i]);
@@ -79,7 +80,7 @@ public class CChannel extends Channel {
   public boolean disconnected() {
     return disconnected;
   }
-  
+	
 	public CircularBuffer getInBuffer() {
 		return inBuffer;
 	}
@@ -94,5 +95,13 @@ public class CChannel extends Channel {
 
 	public void setOutBuffer(CircularBuffer outBuffer) {
 		this.outBuffer = outBuffer;
+	}
+	
+	public CChannel getRemoteChannel() {
+		return remoteChannel;
+	}
+
+	public void setRemoteChannel(CChannel remoteChannel) {
+		this.remoteChannel = remoteChannel;
 	}
 }
