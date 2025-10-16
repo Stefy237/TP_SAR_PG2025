@@ -26,7 +26,7 @@ public class OneBrokerTest {
 		
         Task task2 = new Task("task2", broker);
 		task2.start(() -> {
-			CChannel channel = (CChannel) task1.getBroker().connect("broker",3000);
+			CChannel channel = (CChannel) task2.getBroker().connect("broker",3000);
 			assert channel != null : "Connect should return a channel";
 			byte[] msgSent = "Hi".getBytes();
 			channel.write(msgSent, 0, msgSent.length);

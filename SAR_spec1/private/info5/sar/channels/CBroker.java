@@ -26,6 +26,7 @@ import info5.sar.utils.Type;
 
 public class CBroker extends Broker {
 	private boolean alive = true;
+	private boolean pendingAccept = false;
 	private RDVManager rdvManager = new RDVManager();
 	
 	public CBroker(String name) {
@@ -36,11 +37,11 @@ public class CBroker extends Broker {
   public Channel accept(int port){
 	  System.out.println("------------------------" + this.name + " accepting ----------------------------");
 	  try {
-		RDV rdv = rdvManager.create(port);
-		CChannel channel = rdv.come(this, Type.ACCEPT);
-		
-		return channel;
-	} catch (InterruptedException e) {
+		  RDV rdv = rdvManager.create(port, Type.ACCEPT);
+		  CChannel channel = rdv.come(this, Type.ACCEPT);
+
+		  return channel;
+	} catch (Exception e) {
 		e.printStackTrace();
 	}
 	  return null;
@@ -52,7 +53,7 @@ public class CBroker extends Broker {
 		CBroker remoteBroker = (CBroker) BrokerManager.getInstance().getBrokerByName(name);
 		if(remoteBroker != null) {
 			try {
-				RDV rdv = remoteBroker.getRdvManager().create(port);
+				RDV rdv = remoteBroker.getRdvManager().create(port, Type.CONNECT);
 				CChannel channel = rdv.come(this, Type.CONNECT);
 				
 				return channel;
