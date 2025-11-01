@@ -35,7 +35,6 @@ public class CBroker extends Broker {
 
   @Override
   public Channel accept(int port){
-	  System.out.println("------------------------" + this.name + " accepting ----------------------------");
 	  try {
 		  RDV rdv = rdvManager.create(port, Type.ACCEPT);
 		  CChannel channel = rdv.come(this, Type.ACCEPT);
@@ -49,7 +48,6 @@ public class CBroker extends Broker {
 
 	@Override
 	public Channel connect(String name, int port) {
-		System.out.println("------------------------" + this.name + " connecting ----------------------------");
 		CBroker remoteBroker = (CBroker) BrokerManager.getInstance().getBrokerByName(name);
 		if(remoteBroker != null) {
 			try {
@@ -64,8 +62,8 @@ public class CBroker extends Broker {
 		return null;
 	}
 	
-	  public RDVManager getRdvManager() {
-			return rdvManager;
-	  }
+	public RDVManager getRdvManager() {
+		return rdvManager;
+	}
 
 }

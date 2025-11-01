@@ -16,6 +16,8 @@
  */
 package info5.sar.channels;
 
+import info5.sar.queue.QueueBroker;
+
 public class Task extends Thread {
   
   static boolean VERBOSE = true;
@@ -31,6 +33,7 @@ public class Task extends Thread {
   }
 
   protected Broker broker;
+  protected QueueBroker qbroker;
   protected Runnable boot;
   protected boolean alive;
   protected boolean dead;
@@ -45,8 +48,17 @@ public class Task extends Thread {
     this.broker = broker;
   }
 
+  public Task(String name, QueueBroker qbroker) {
+    super(name);
+    this.qbroker = qbroker;
+  }
+
   public Broker getBroker() {
     return broker;
+  }
+
+  public QueueBroker getQueueBroker() {
+    return qbroker;
   }
 
   public boolean alive() {

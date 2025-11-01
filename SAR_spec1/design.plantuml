@@ -1,4 +1,6 @@
 @startuml design version 1
+left to right direction
+
 circle task1
 circle task2
 circle broker1

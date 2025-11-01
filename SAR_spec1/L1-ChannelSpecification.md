@@ -32,7 +32,7 @@ Signature:
   write(byte[] bytes,int offset,int length)int
 ```
 
-When writing, the given byte array contains the bytes to write from the given offset and for the given length. The range [offset,offset+length[ must be within the array boundaries, without wrapping around at either ends. If it is not the case, an illegal-argument exception is thrown.
+When writing, the given byte array contains the bytes to write from the given offset and for the given length. The range [offset,offset+length] must be within the array boundaries, without wrapping around at either ends. If it is not the case, an illegal-argument exception is thrown.
 
 The method "write" returns the number of bytes actually written, that number may not be zero or negative. If zero would be return, the write operation blocks instead until it can make some progress.
 
@@ -62,7 +62,7 @@ Signature:
   read(byte[] bytes,int offset,int length)int
 ```
 
-When reading, the given byte array will be used to store the bytes read from the channel, starting at the given offset. The given length provides the maximum number of bytes to read. The range [offset,offset+length[ must be within the array boundaries, without wrapping around at either ends. If this is not the case, an illegal-argument exception is thrown.
+When reading, the given byte array will be used to store the bytes read from the channel, starting at the given offset. The given length provides the maximum number of bytes to read. The range [offset,offset+length] must be within the array boundaries, without wrapping around at either ends. If this is not the case, an illegal-argument exception is thrown.
 
 The method "read" will return the number of bytes actually read, that number may not be zero or negative. If zero would be returned, the method "read" blocks instead, until some bytes become available. The rationale is that a loop trying to read a given length, looping over until all the needed bytes are read will not induce an active polling. Here is an example:
 

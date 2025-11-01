@@ -19,7 +19,7 @@ public class MultipleBrokerTest {
 			byte[] msgSent = "Hello".getBytes();
 			channel.write(msgSent, 0, msgSent.length);
 			byte[] buffer = new byte[10];
-			int n = channel.read(buffer, 0, buffer.length);
+			int n = channel.read(buffer, 0, 2);
 			String msgReceived = new String(buffer, 0, n);
 			assert msgReceived.equals("Hi") : "Wrong message Received";
             System.out.println("Message received by task1 " + msgReceived);
@@ -32,7 +32,7 @@ public class MultipleBrokerTest {
 			byte[] msgSent = "Hi".getBytes();
 			channel.write(msgSent, 0, msgSent.length);
 			byte[] buffer = new byte[10];
-			int n = channel.read(buffer, 0, buffer.length);
+			int n = channel.read(buffer, 0, 5);
 			String msgReceived = new String(buffer, 0, n);
 			assert msgReceived.equals("Hello") : "Wrong message Received";
             System.out.println("Message received by task2 " + msgReceived);

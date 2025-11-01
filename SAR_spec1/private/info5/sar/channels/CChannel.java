@@ -16,19 +16,26 @@
  */
 package info5.sar.channels;
 
+import java.util.concurrent.locks.Condition;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
+
 import info5.sar.utils.CircularBuffer;
 
 public class CChannel extends Channel {
 	private CircularBuffer inBuffer;
 	private CircularBuffer outBuffer;
 	private CChannel remoteChannel;
-	// private CBroker broker;
+	
+	private final Lock lock = new ReentrantLock();
+    private final Condition notEmpty = lock.newCondition();
+    private final Condition notFull = lock.newCondition();
 
 	private boolean disconnected = false;
 	
   protected CChannel(Broker broker, int port) {
     super(broker);
-    this.inBuffer = new CircularBuffer(1000);
+    this.inBuffer = new CircularBuffer(100);
   }
   
   protected CChannel(Broker broker, CircularBuffer inBuffer, CircularBuffer outBuffer) {
@@ -44,35 +51,64 @@ public class CChannel extends Channel {
 
   @Override
   public synchronized int read(byte[] bytes, int offset, int length) {
-	System.out.println("------------------------" + broker.getName() + " is reading from " + getRemoteName() + " ----------------------------");
-    int i = 0;
-    while(i < length-offset && !inBuffer.empty()) {
-    	bytes[i] = inBuffer.pull();
-    	i++;
-    	if(disconnected()) throw new RuntimeException();
-    }
-    System.out.println("------------------------ end reading ----------------------------");
-    return i;
+	if (disconnected) throw new IllegalStateException("Channel disconnected");
+	if (offset < 0 || length < 0 || offset + length > bytes.length) throw new IllegalArgumentException();
+
+    int bytesRead = 0;
+	lock.lock();
+    try {
+		while (bytesRead < length) {
+			while (inBuffer.empty()) {
+				if (disconnected) return bytesRead;
+				notEmpty.await();
+			}
+			bytes[offset+bytesRead] = inBuffer.pull();
+			bytesRead++;
+			notFull.signal();
+		}
+	} catch (InterruptedException e) {
+		e.printStackTrace();
+	} finally {
+		lock.unlock();
+	}
+    return bytesRead;
   }
 
   @Override
   public synchronized int write(byte[] bytes, int offset, int length) {
-	  System.out.println("------------------------ " + broker.getName() + " is writing to " + getRemoteName() + "----------------------------");
-    int i = 0;
-    while(i < length-offset && !outBuffer.full()) {
-    	outBuffer.push(bytes[i]);
-    	i++;
-    	if(disconnected()) throw new RuntimeException();
-    }
-    System.out.println("------------------------ end reading ----------------------------");
-    return i;
+	if (disconnected) throw new IllegalStateException("Channel disconnected");
+	if (offset < 0 || length < 0 || offset + length > bytes.length) throw new IllegalArgumentException();
+
+    int bytesWritten = 0;
+	lock.lock();
+	try {
+		while(bytesWritten < length) {
+			while (outBuffer.full()) {
+				if (disconnected) return bytesWritten;
+				notFull.await();
+			}
+			outBuffer.push(bytes[bytesWritten + offset]);
+			bytesWritten++;
+			notEmpty.signal();
+    	}
+	} catch (InterruptedException e) {
+		e.printStackTrace();
+	} finally {
+		lock.unlock();
+	}
+    
+    return bytesWritten;
   }
 
   @Override
   public void disconnect() {
-    if(!disconnected) {
-    	disconnected = true;
-    	
+    lock.lock();
+    try {
+        disconnected = true;
+        notEmpty.signalAll();
+        notFull.signalAll();
+    } finally {
+        lock.unlock();
     }
   }
 

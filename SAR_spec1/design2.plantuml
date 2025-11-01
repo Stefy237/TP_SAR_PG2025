@@ -1,0 +1,26 @@
+@startuml Design du queue broker synchrone
+left to right direction
+
+circle task1
+circle queueBroker1
+circle messageQueue
+circle readerAutomata
+circle writerAutomata
+rectangle "Logique des brokers" {
+    circle broker1
+    circle broker2
+    circle channel1
+    circle channel2
+}
+
+task1 --> queueBroker1
+queueBroker1 --> broker1
+queueBroker1 --> messageQueue
+broker1 --> channel1
+' messageQueue -> channel1
+messageQueue -> writerAutomata
+messageQueue -> readerAutomata
+writerAutomata --> channel1
+readerAutomata --> channel1
+broker2 --> channel2
+@enduml
