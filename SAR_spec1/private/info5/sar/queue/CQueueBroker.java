@@ -7,18 +7,18 @@ import info5.sar.utils.WriterAutomata;
 
 public class CQueueBroker extends QueueBroker {
 
-    CQueueBroker(Broker broker) {
+    public CQueueBroker(Broker broker) {
         super(broker);
     }
 
     @Override
-    MessageQueue accept(int port) {
+    public MessageQueue accept(int port) {
         CChannel channel = (CChannel) broker.accept(port);
         return new CMessageQueue(this, channel);
     }
 
     @Override
-    MessageQueue connect(String name, int port) {
+    public MessageQueue connect(String name, int port) {
         CChannel channel = (CChannel) broker.connect(name, port);
         if (channel == null) return null;
         return new CMessageQueue(this, channel);

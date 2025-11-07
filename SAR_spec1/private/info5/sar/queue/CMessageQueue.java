@@ -9,7 +9,7 @@ public class CMessageQueue extends MessageQueue {
     private WriterAutomata writer;
     private ReaderAutomata reader;
 
-    protected CMessageQueue(QueueBroker qbroker, CChannel channel) {
+    public CMessageQueue(QueueBroker qbroker, CChannel channel) {
         super(qbroker);
         this.writer = new WriterAutomata(channel);
         this.reader = new ReaderAutomata(channel);
@@ -22,22 +22,22 @@ public class CMessageQueue extends MessageQueue {
     }
 
     @Override
-    void send(byte[] bytes, int offset, int length) {
+    public void send(byte[] bytes, int offset, int length) {
         writer.write(bytes, offset, length);
     }
 
     @Override
-    byte[] receive() {
+    public byte[] receive() {
         return reader.read();
     }
 
     @Override
-    void close() {
+    public void close() {
         channel.disconnect();
     }
 
     @Override
-    boolean closed() {
+    public boolean closed() {
         return channel.disconnected();
     }
     
