@@ -17,8 +17,7 @@ public class CMessageQueue extends MessageQueue {
 
     @Override
     public String getRemoteName() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getRemoteName'");
+        return channel.getRemoteName();
     }
 
     @Override

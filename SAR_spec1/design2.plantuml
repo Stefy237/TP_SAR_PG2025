@@ -1,12 +1,15 @@
 @startuml Design du queue broker synchrone
 left to right direction
 
+skinparam ranksep 0
+skinparam nodesep 0
+
 circle task1
 circle queueBroker1
 circle messageQueue
 circle readerAutomata
 circle writerAutomata
-rectangle "Logique des brokers" {
+rectangle "Sous couche des brokers" {
     circle broker1
     circle broker2
     circle channel1
@@ -15,12 +18,13 @@ rectangle "Logique des brokers" {
 
 task1 --> queueBroker1
 queueBroker1 --> broker1
-queueBroker1 --> messageQueue
+queueBroker1 -down-> messageQueue
 broker1 --> channel1
-' messageQueue -> channel1
+messageQueue -> channel1
 messageQueue -> writerAutomata
 messageQueue -> readerAutomata
 writerAutomata --> channel1
 readerAutomata --> channel1
 broker2 --> channel2
+
 @enduml

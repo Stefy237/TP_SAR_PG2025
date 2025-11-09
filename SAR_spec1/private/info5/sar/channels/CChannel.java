@@ -104,13 +104,31 @@ public class CChannel extends Channel {
   public void disconnect() {
     lock.lock();
     try {
+        if (disconnected) return; 
         disconnected = true;
         notEmpty.signalAll();
         notFull.signalAll();
     } finally {
         lock.unlock();
     }
+
+    // prévenir l'autre côté hors du verrou local
+    if (remoteChannel != null && !remoteChannel.disconnected()) {
+        remoteChannel.remoteDisconnect();
+    }
   }
+
+  // Méthode interne : appelée uniquement depuis le canal distant
+	protected void remoteDisconnect() {
+		lock.lock();
+		try {
+			disconnected = true;
+			notEmpty.signalAll();
+			notFull.signalAll();
+		} finally {
+			lock.unlock();
+		}
+	}
 
   @Override
   public boolean disconnected() {

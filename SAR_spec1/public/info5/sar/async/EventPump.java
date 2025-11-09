@@ -3,17 +3,18 @@ package info5.sar.async;
 import java.util.concurrent.*;
 
 public abstract class EventPump extends Thread {
-    private BlockingQueue<Runnable> queue = new LinkedBlockingQueue<>();
+    private BlockingQueue<Runnable> ready = new LinkedBlockingQueue<>();
+    // private BlockingQueue<Runnable> delayed = new LinkedBlockingQueue<>();
 
     public void post(Runnable e) {
-        queue.offer(e);
+        ready.offer(e);
     }
 
-    public void post(Runnable e, int delayMillis) {
+    public void post(Runnable e, int delay) {
         new Thread(() -> {
             try {
-                Thread.sleep(delayMillis);
-                queue.offer(e);
+                Thread.sleep(delay);
+                ready.offer(e);
             } catch (InterruptedException ignored) {}
         }).start();
     }
@@ -22,7 +23,7 @@ public abstract class EventPump extends Thread {
     public void run() {
         while (true) {
             try {
-                Runnable e = queue.take();
+                Runnable e = ready.take();
                 e.run();
             } catch (InterruptedException ignored) {}
         }

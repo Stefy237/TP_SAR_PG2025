@@ -5,6 +5,12 @@ import info5.sar.channels.CChannel;
 import info5.sar.channels.Task;
 import info5.sar.utils.BrokerManager;
 
+/**
+ * Test de connexion sur la couche Broker/Channel.
+ *
+ *
+ */
+
 public class OneBrokerTest {
 	public static void main(String[] args) {
 		

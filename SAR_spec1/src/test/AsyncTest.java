@@ -6,7 +6,7 @@ import info5.sar.async.EventPump;
 import info5.sar.async.MessageQueue;
 
 public class AsyncTest {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         EventPump pump = new EventPump() {};
 
         pump.start();
@@ -14,7 +14,8 @@ public class AsyncTest {
         CQueueBroker qbA = new CQueueBroker("aqbA", pump);
         CQueueBroker qbB = new CQueueBroker("aqbB", pump);
 
-        qbB.bind(1234, queue -> {
+        qbB.bind(1234, (queue) -> {
+            System.out.println("[B] accepte la connection");
             queue.setListener(new CMessageQueue.Listener() {
                 public void received(byte[] msg) {
                     System.out.println("[B] reçu : " + new String(msg));
@@ -36,5 +37,7 @@ public class AsyncTest {
                 System.out.println("[A] connexion refusée");
             }
         });
+
+        pump.join(1000);
     }
 }

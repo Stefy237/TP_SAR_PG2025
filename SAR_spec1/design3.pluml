@@ -1,0 +1,63 @@
+@startuml SAR - design de la surcouche évènementielle
+
+entity eventPump
+entity runnable1
+entity runnable2
+entity runnable3
+entity runnable4
+
+circle QB1
+circle QB2
+circle MQ1
+circle MQ2
+
+circle broker1
+circle broker2
+circle channel1
+circle channel2
+
+rectangle "couche évènementielle " {
+    eventPump
+    QB1
+    QB2
+    MQ1
+    MQ2
+}
+
+rectangle "couche bloquante" {
+    broker1
+    broker2
+    channel1
+    channel2
+    runnable1
+    runnable2
+    runnable3
+    runnable3
+}
+
+QB1 --> eventPump : AcceptListener
+QB2 --> eventPump : connecListener
+MQ1 --> eventPump : Listener
+
+QB1 ..> MQ1
+QB2 ..> MQ2
+
+broker1 --> runnable1 
+broker2 --> runnable2 
+channel1 --> runnable3 
+channel2 --> runnable4 
+
+activate runnable1
+runnable1 --> runnable1 : accept
+deactivate runnable1
+activate runnable2
+runnable2 --> runnable1 : connect
+deactivate runnable2
+
+broker1 --> channel1 
+broker2 --> channel2 
+
+runnable3 --> runnable4 : read
+activate runnable3
+
+@enduml

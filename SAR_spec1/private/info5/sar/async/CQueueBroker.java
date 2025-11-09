@@ -21,6 +21,18 @@ public class CQueueBroker extends QueueBroker {
 
     @Override
     public boolean bind(int port, AcceptListener listener) {
+        new Thread(() -> {
+            try {
+                Channel channel = broker.accept(port);
+                if (channel == null) return;
+                
+                CMessageQueue queue = new CMessageQueue(channel, pump);
+                pump.post(() -> listener.accepted(queue));
+                
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }).start();
         return bindings.putIfAbsent(port, listener) == null;
     }
 
